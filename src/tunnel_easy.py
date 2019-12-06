@@ -2,8 +2,10 @@
 import dpkt
 import logging
 import socket
-
 import tunnel
+import pdb
+from scapy.layers.inet import IP, ICMP
+from scapy.sendrecv import sr
 
 LOGLEVEL = logging.DEBUG
 LOGFORMAT = '%(name)s - %(levelname)s - %(message)s'
@@ -20,6 +22,14 @@ if __name__ == '__main__':
         """Echo the received data back to the sender
         but swap source and dest IPs"""
         # Assume it's L3
+        #print("Here is the data received..: {}".format(data))
+        #TODO: Here is where we would print the contents of the packet using scapy.
+        print(IP(data).show())
+        
+#        IPPacket = Packet(pkt)a
+        #TODO: Here is where we would forward the packet using scapy. 
+
+        #TODO: Then, we would take the packet and write it back to the tun..
         leading_bytes = data[:4]
         data = data[4:]  # Strip off the first 4 bytes
         ip_pkt = dpkt.ip.IP(data)

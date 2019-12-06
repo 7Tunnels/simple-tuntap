@@ -1,0 +1,1 @@
+ip route add 8.8.8.8 dev tun0
