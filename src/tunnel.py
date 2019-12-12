@@ -30,8 +30,8 @@ class Tunnel(object):
 
         # TODO Set up addressing
         os.system('ip link set %s up' % self._tun.name)
-        os.system('ip address add 192.168.40.1/32 dev %s' % self._tun.name)
-        os.system('ip route add 192.168.40.2/32 dev %s' % self._tun.name)
+        # os.system('ip address add 192.168.40.1/32 dev %s' % self._tun.name) #Sets tun0's IP address as 192.168.40.1
+        # os.system('ip route add 192.168.40.2/32 dev %s' % self._tun.name) #Says any traffic to 192.168.40.2, forward to tun0.
 
     def close(self):
         """Shutdown and close the tunnel"""

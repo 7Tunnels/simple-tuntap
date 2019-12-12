@@ -1,1 +1,6 @@
-ip route add 8.8.8.8 dev tun0
+sudo ip route add 8.8.8.8 dev tun0
+sudo ip route add 18.223.239.214 dev tun0
+sudo iptables -t nat -A POSTROUTING -o tun0 -j MASQUERADE
+sudo iptables -t nat -A POSTROUTING --source 192.168.40.1/32 -j SNAT --to-source 192.168.40.2 #Make all packets from 192.168.40.1 changed to be from 192.168.40.2 so that the response traffic goes to 192.168.40.2.
+#Masquerading and forwarding
+#Kernel setting IPv4 forwarding
