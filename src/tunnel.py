@@ -30,6 +30,8 @@ class Tunnel(object):
 
         # TODO Set up addressing
         os.system('ip link set %s up' % self._tun.name)
+
+        #Commented out by Kody since we're now creating two tun's we don't want them to have the same IP address.
         # os.system('ip address add 192.168.40.1/32 dev %s' % self._tun.name) #Sets tun0's IP address as 192.168.40.1
         # os.system('ip route add 192.168.40.2/32 dev %s' % self._tun.name) #Says any traffic to 192.168.40.2, forward to tun0.
 
@@ -53,11 +55,11 @@ class Tunnel(object):
             for f in r:
                 if f == self._tun:
                     self._logger.debug('Handling packet...')
-                    data = f.recv()
+                    data = f.recv() #Where we read the packet tun's file descriptor
                     if self._handler:
-                        self._handler(data)
+                        self._handler(data) #Calling our handler function defined in tunnel_easy.py
 
-    def send(self, data):
+    def send(self, data): #Writing the data back to the tun file descriptor
         """Write the received data to the tun socket"""
         self._logger.debug("Sending packet...")
         self._tun.send(data)
