@@ -35,23 +35,13 @@ if __name__ == '__main__':
         print "Sender: {0}\nReceiver: {1}".format(IP(data).src, IP(data).dst)
         pkt = IP(data)
         if pkt.src == '192.168.40.1':
-            pkt.src = '192.168.40.2'
-            del pkt.chksum
-            #need to set the checksum to 0 so that it gets recalculated..
-        # print IP(pkt).show2()
-        # p = sr(IP(pkt))
-        send(IP(pkt), iface="tun1")
-        # print "Response: \n"
-        # print IP(p).show()
-        # p = sr(IP(data)) #Commented out because we're not getting a response yet..
-        # ip_pkt = dpkt.ip.IP(data)
-        # ip_pkt.src = "192.168.40.2"
-        # send(IP(ip_pkt.__bytes__())) #Just send the packet out to the network..
-        # src = ip_pkt.src
-        # dst = ip_pkt.dst
-        # ip_pkt.src = dst
-        # ip_pkt.dst = src
-        # data = leading_bytes + ip_pkt.__bytes__()
+            pkt.src = '192.168.1.106'
+            del pkt.chksum #deleting this and calling show2 recalculates the chksum.
+            
+        print IP(pkt).show2()
+        send(IP(pkt), iface="tun0")
+        # send(IP(pkt), iface="tun1")
+        
         # t.send(p)
     def echohandler1(data):
         leading_bytes = data[:4]
@@ -64,20 +54,18 @@ if __name__ == '__main__':
         pkt = IP(data)
         return
 
-    # os.system('sudo ip route add 8.8.8.8 dev tun0')
     os.system('ip address add 192.168.40.1/32 dev tun0') #Sets tun0's IP address as 192.168.40.1
     os.system('ip route add 192.168.40.2/32 dev tun0') #Says any traffic to 192.168.40.2, forward to tun0.
+    os.system('ip route add default 192.168.40.0/24 via 192.168.1.106') #Set the default route for 192.168.40.0/24 to go through this machine's ip address
 
-    os.system('ip address add 192.168.40.3/32 dev tun1')
-    os.system('ip route add 192.168.40.4/32 dev tun1')
+    # os.system('ip address add 192.168.40.3/32 dev tun1')
+    # os.system('ip route add 192.168.40.4/32 dev tun1')
 
     os.system('sudo ip route add 18.223.239.214 dev tun0')
-    os.system('sudo iptables -t nat -A POSTROUTING -o tun1 -j MASQUERADE')
-
-
-    # os.system('sudo iptables -A FORWARD -i tun0 -o wlp1s0 -m state --state RELATED,ESTABLISHED -j ACCEPT')
-    # os.system('sudo iptables -A FORWARD -i wlp1s0 -o tun0 -j ACCEPT')
-    # os.system('sudo iptables -t nat -A POSTROUTING --source 192.168.40.1/32 -j SNAT --to-source 192.168.40.2') #Make all packets from 192.168.40.1 changed to be from 192.168.40.2 so that the response traffic goes to 192.168.40.2.
+    os.system('sudo iptables -A FORWARD -i wlp1s0 -o tun0 -j ACCEPT')
+    # os.system('sudo iptables -A FORWARD -i tun1 -o wlp1s0 -m state --state ESTABLISHED,RELATED -j ACCEPT')
+    # os.system('sudo iptables -t nat -A POSTROUTING -o tun1 -j MASQUERADE')
+   
     t.set_rx_handler(echohandler)
     t.monitor()
 
