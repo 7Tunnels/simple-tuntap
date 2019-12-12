@@ -40,7 +40,7 @@ if __name__ == '__main__':
             del pkt.chksum #deleting this and calling show2 recalculates the chksum.
             
         print IP(pkt).show2()
-        send(IP(pkt), iface="tun1")
+        send(IP(pkt))
         
         # t.send(p)
     def echohandler1(data):
@@ -62,9 +62,11 @@ if __name__ == '__main__':
     os.system('ip route add 192.168.40.4/32 dev tun1')
 
     os.system('sudo ip route add 18.223.239.214 dev tun0')
-    os.system('sudo iptables -A FORWARD -i wlp1s0 -o tun1 -j ACCEPT')
-    os.system('sudo iptables -A FORWARD -i tun1 -o wlp1s0 -m state --state ESTABLISHED,RELATED -j ACCEPT')
-    os.system('sudo iptables -t nat -A POSTROUTING -o tun1 -j MASQUERADE')
+    conf.route.add(host='18.223.239.214', dev='tun1') #Telling tun0 to route traffic to 18.223.239.214 to tun1.
+
+    # os.system('sudo iptables -A FORWARD -i wlp1s0 -o tun1 -j ACCEPT')
+    # os.system('sudo iptables -A FORWARD -i tun1 -o wlp1s0 -m state --state ESTABLISHED,RELATED -j ACCEPT')
+    # os.system('sudo iptables -t nat -A POSTROUTING -o tun1 -j MASQUERADE')
    
     t.set_rx_handler(echohandler)
     t.monitor()
