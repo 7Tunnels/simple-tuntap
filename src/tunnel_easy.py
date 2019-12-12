@@ -35,7 +35,7 @@ if __name__ == '__main__':
         print "Sender: {0}\nReceiver: {1}".format(IP(data).src, IP(data).dst)
         pkt = IP(data)
         if pkt.src == '192.168.40.1':
-            pkt.src = '192.168.1.106'
+            pkt.src = '192.168.1.106' #Wes/Aaron, Put your machine's IP here
             del pkt.chksum #deleting this and calling show2 recalculates the chksum.
             
         print IP(pkt).show2()
