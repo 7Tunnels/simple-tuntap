@@ -7,7 +7,7 @@ import pdb
 import binascii
 from scapy.layers.inet import IP, ICMP
 from scapy.sendrecv import sr
-from scapy.all import send 
+from scapy.all import send, conf
 import sys
 import os
 
@@ -21,7 +21,8 @@ def dummyhandler(_):
 if __name__ == '__main__':
     logging.basicConfig(format=LOGFORMAT, level=LOGLEVEL)
     t = tunnel.Tunnel(mode='tun')
-    # t1 = tunnel.Tunnel(mode='tun')
+    t1 = tunnel.Tunnel(mode='tun')
+    print conf.route
     def echohandler(data):
         """Echo the received data back to the sender
         but swap source and dest IPs"""
@@ -35,12 +36,11 @@ if __name__ == '__main__':
         print "Sender: {0}\nReceiver: {1}".format(IP(data).src, IP(data).dst)
         pkt = IP(data)
         if pkt.src == '192.168.40.1':
-            pkt.src = '192.168.1.106'
+            pkt.src = '192.168.1.2'
             del pkt.chksum #deleting this and calling show2 recalculates the chksum.
             
         print IP(pkt).show2()
-        send(IP(pkt), iface="tun0")
-        # send(IP(pkt), iface="tun1")
+        send(IP(pkt), iface="tun1")
         
         # t.send(p)
     def echohandler1(data):
@@ -58,21 +58,23 @@ if __name__ == '__main__':
     os.system('ip route add 192.168.40.2/32 dev tun0') #Says any traffic to 192.168.40.2, forward to tun0.
     os.system('ip route add default 192.168.40.0/24 via 192.168.1.106') #Set the default route for 192.168.40.0/24 to go through this machine's ip address
 
-    # os.system('ip address add 192.168.40.3/32 dev tun1')
-    # os.system('ip route add 192.168.40.4/32 dev tun1')
+    os.system('ip address add 192.168.40.3/32 dev tun1')
+    os.system('ip route add 192.168.40.4/32 dev tun1')
 
     os.system('sudo ip route add 18.223.239.214 dev tun0')
-    os.system('sudo iptables -A FORWARD -i wlp1s0 -o tun0 -j ACCEPT')
-    # os.system('sudo iptables -A FORWARD -i tun1 -o wlp1s0 -m state --state ESTABLISHED,RELATED -j ACCEPT')
-    # os.system('sudo iptables -t nat -A POSTROUTING -o tun1 -j MASQUERADE')
+    os.system('sudo iptables -A FORWARD -i wlp1s0 -o tun1 -j ACCEPT')
+    os.system('sudo iptables -A FORWARD -i tun1 -o wlp1s0 -m state --state ESTABLISHED,RELATED -j ACCEPT')
+    os.system('sudo iptables -t nat -A POSTROUTING -o tun1 -j MASQUERADE')
    
     t.set_rx_handler(echohandler)
     t.monitor()
 
-    # t1.set_rx_handler(echohandler1)
-    # t1.monitor()
+    t1.set_rx_handler(echohandler1)
+    t1.monitor()
 
     try:
         raw_input('Wait indefinitely. Press ctrl-c to quit.')
     except KeyboardInterrupt:
+        os.system('sudo iptables -t nat -F')
         t.close()
+        t1.close()
